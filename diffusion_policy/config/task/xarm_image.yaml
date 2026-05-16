@@ -1,0 +1,30 @@
+name: xarm_image
+
+image_shape: &image_shape [3, 224, 224]
+shape_meta: &shape_meta
+  obs:
+    image:
+      shape: *image_shape
+      type: rgb
+    wrist_image:
+      shape: *image_shape
+      type: rgb
+    agent_pos:
+      shape: [10]
+      type: low_dim
+  action:
+    shape: [10]
+
+# No-op runner — real-robot dataset has no sim, evaluation is via val_loss only.
+env_runner:
+  _target_: diffusion_policy.env_runner.real_pusht_image_runner.RealPushTImageRunner
+
+dataset:
+  _target_: diffusion_policy.dataset.xarm_image_dataset.XArmImageDataset
+  zarr_path: /data/edward/diffusion_policy_data/xarm_raw.zarr
+  horizon: ${horizon}
+  pad_before: ${eval:'${n_obs_steps}-1'}
+  pad_after: ${eval:'${n_action_steps}-1'}
+  seed: 42
+  val_ratio: 0.05
+  max_train_episodes: null
